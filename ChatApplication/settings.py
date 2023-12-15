@@ -28,6 +28,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
+    'account.backend.CaseInsensitiveModelBackend',
+)
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,7 +45,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     # my apps
-    'personal'
+    'personal',
+    'account',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +94,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'account.Account'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
