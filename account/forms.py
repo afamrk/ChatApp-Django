@@ -24,3 +24,11 @@ class AccountRegistrationForm(UserCreationForm):
     #     except Exception:
     #         return username
     #     raise forms.ValidationError(f'{username} already in user')
+
+
+class AccountUpdate(forms.ModelForm):
+
+    class Meta:
+        model = models.Account
+        fields = ['email', 'username', 'hide_email', 'profile_image']
+        widgets = {'profile_image': forms.widgets.FileInput}
