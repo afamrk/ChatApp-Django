@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.conf import settings
 from .models import Account
 from django.db.models import Q
+from friends.utils import is_request_send, FriendRequestStatus
 
 
 def user_registration(request):
@@ -30,16 +31,28 @@ def user_registration(request):
 
 def user_profile(request, user_id):
     current_user = request.user
-
     try:
-        profile_user = Account.objects.get(pk=user_id)
+        account = Account.objects.get(pk=user_id)
     except Account.DoesNotExist:
         raise Http404
 
+    all_friends = current_user.friends.all()
+    is_friend = account in all_friends
+    is_self = current_user == account
+    request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
+    frient_requests = current_user.receiver.filter(is_active=True)
+    if not is_self:
+        if is_request_send(current_user, account):
+            request_sent = FriendRequestStatus.YOU_SENT_TO_THEM.value
+        elif is_request_send(account, current_user):
+            request_sent = FriendRequestStatus.THEM_SENT_TO_YOU.value
     context = {
-        'is_self': current_user == profile_user,
-        'is_friend': True,
-        'account':  profile_user
+        'is_self': current_user == account,
+        'is_friend': is_friend,
+        'account':  account,
+        'friends': all_friends,
+        'request_sent': request_sent,
+        'friend_requests': frient_requests
     }
     return render(request, 'account/profile.html', context)
 
