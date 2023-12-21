@@ -1,0 +1,19 @@
+<script>
+    function cancelFriendRequest(id){
+        payload = {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            request_id: id
+        }
+        $.ajax(
+            {
+                type: "POST",
+                dataType: "json",
+                url: "{% url 'friends:cancel_friend_request' %}",
+                timeout: 5000,
+                data: payload,
+                headers: {},
+                success: () => location.reload()
+            }
+        )
+    }
+</script>
