@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 class FriendList(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friendlist')
     friends = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='friends')
 
     def __str__(self):
@@ -23,8 +23,7 @@ class FriendList(models.Model):
 
     def unfriend(self, account):
         self.remove_friend(account)
-        friends_list = FriendList.objects.get(user=account)
-        friends_list.remove_friend(self.user)
+        account.friendlist.remove_friend(self.user)
         self.save()
 
     def is_mutual_friends(self, account):
@@ -42,9 +41,12 @@ class FriedRequest(models.Model):
         return self.sender.username
 
     def accept(self):
-        self.sender.friends.add(self.receiver)
-        self.receiver.friends.add(self.sender)
-        self.is_active = True
+        # TODO
+        FriendList.objects.get_or_create(user=self.sender)
+        FriendList.objects.get_or_create(user=self.receiver)
+        self.sender.friendlist.add_friend(self.receiver)
+        self.receiver.friendlist.add_friend(self.sender)
+        self.is_active = False
         self.save()
 
     def decline(self):

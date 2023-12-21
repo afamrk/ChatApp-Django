@@ -6,6 +6,7 @@ from django.conf import settings
 from .models import Account
 from django.db.models import Q
 from friends.utils import is_request_send, FriendRequestStatus
+from friends.models import FriendList
 
 
 def user_registration(request):
@@ -30,29 +31,40 @@ def user_registration(request):
 
 
 def user_profile(request, user_id):
-    current_user = request.user
+    user = request.user
     try:
         account = Account.objects.get(pk=user_id)
     except Account.DoesNotExist:
         raise Http404
 
-    all_friends = current_user.friends.all()
-    is_friend = account in all_friends
-    is_self = current_user == account
+    all_friends = account.friendlist.friends.all()
+    is_self = user == account
+    is_friend = user in all_friends
     request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
-    frient_requests = current_user.receiver.filter(is_active=True)
-    if not is_self:
-        if is_request_send(current_user, account):
+    friend_requests = None
+    pending_friend_request = FriendRequestStatus.NO_REQUEST_SENT.value
+
+    if not is_self and user.is_authenticated:
+        pending_friend_request = is_request_send(user, account)
+        if pending_friend_request:
             request_sent = FriendRequestStatus.YOU_SENT_TO_THEM.value
-        elif is_request_send(account, current_user):
-            request_sent = FriendRequestStatus.THEM_SENT_TO_YOU.value
+        else:
+            pending_friend_request = is_request_send(account, user)
+            if pending_friend_request:
+                request_sent = FriendRequestStatus.THEM_SENT_TO_YOU.value
+    elif user.is_authenticated:
+        friend_requests = user.receiver.filter(is_active=True)
+    else:
+        pass
+
     context = {
-        'is_self': current_user == account,
+        'is_self': is_self,
         'is_friend': is_friend,
         'account':  account,
         'friends': all_friends,
         'request_sent': request_sent,
-        'friend_requests': frient_requests
+        'friend_requests': friend_requests,
+        'pending_friend_request': pending_friend_request
     }
     return render(request, 'account/profile.html', context)
 
@@ -67,7 +79,8 @@ def search_user(request):
             query = Q(username__icontains=search_string) | Q(email__icontains=search_string)
             accounts = Account.objects.filter(query)
             for account in accounts:
-                context['accounts'].append((account, False))
+                is_friend = account.friendlist.is_mutual_friends(request.user)
+                context['accounts'].append((account, is_friend))
 
     return render(request, 'account/search_user.html', context)
 

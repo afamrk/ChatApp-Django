@@ -1,14 +1,14 @@
 <script>
-    function sendFriendRequest(id){
+    function declineFriendRequest(id){
         payload = {
             csrfmiddlewaretoken: "{{ csrf_token }}",
-            user_id: id
+            request_id: id
         }
         $.ajax(
             {
                 type: "POST",
                 dataType: "json",
-                url: "{% url 'friends:send_friend_request' %}",
+                url: "{% url 'friends:decline_friend_request' %}",
                 timeout: 5000,
                 data: payload,
                 headers: {},

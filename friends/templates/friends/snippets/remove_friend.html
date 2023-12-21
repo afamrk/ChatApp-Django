@@ -1,5 +1,5 @@
 <script>
-    function sendFriendRequest(id){
+    function removeFriend(id){
         payload = {
             csrfmiddlewaretoken: "{{ csrf_token }}",
             user_id: id
@@ -8,7 +8,7 @@
             {
                 type: "POST",
                 dataType: "json",
-                url: "{% url 'friends:send_friend_request' %}",
+                url: "{% url 'friends:remove_friend' %}",
                 timeout: 5000,
                 data: payload,
                 headers: {},

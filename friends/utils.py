@@ -4,7 +4,7 @@ from enum import Enum
 
 def is_request_send(sender, receiver):
     try:
-        return FriedRequest.objects.get(sender=sender, receiver=receiver)
+        return FriedRequest.objects.get(sender=sender, receiver=receiver, is_active=True)
     except FriedRequest.DoesNotExist:
         return False
 
