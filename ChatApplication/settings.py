@@ -37,10 +37,12 @@ AUTHENTICATION_BACKENDS = (
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     # my apps
     'personal',
     'account',
     'friends',
+    'public_chat',
 
     "django.contrib.admin",
     "django.contrib.auth",
@@ -84,7 +86,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "ChatApplication.wsgi.application"
+ASGI_APPLICATION = "ChatApplication.routing.application"
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 10001)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -152,6 +163,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
