@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from chat.utils import get_or_create_private_chat
 
 # Create your models here.
 
@@ -16,10 +17,20 @@ class FriendList(models.Model):
             self.friends.add(account)
             self.save()
 
+            chat = get_or_create_private_chat(self.user, account)
+            if not chat.is_active:
+                chat.is_active = True
+                chat.save()
+
     def remove_friend(self, account):
         if account in self.friends.all():
             self.friends.remove(account)
             self.save()
+
+            chat = get_or_create_private_chat(self.user, account)
+            if chat.is_active:
+                chat.is_active = False
+                chat.save()
 
     def unfriend(self, account):
         self.remove_friend(account)

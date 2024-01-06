@@ -175,7 +175,7 @@
 			{% endif %}
 
 			{% if is_friend %}
-				<div class="d-flex flex-row align-items-center btn btn-primary m-2 px-4" onclick="createOrReturnPrivateChat('{{id}}')">
+				<div class="d-flex flex-row align-items-center btn btn-primary m-2 px-4" onclick="redirect_to_private_chat({{ account.id }})">
 					<span class="material-icons m-auto">
 					message
 					</span>
@@ -245,6 +245,10 @@
 	function triggerDeclineFriendRequest(friend_request_id){
 		declineFriendRequest(friend_request_id, onFriendRequestDeclined)
 	}
+    function redirect_to_private_chat(user_id){
+        const redirect_url = '{% url 'chat:private_chat_room' %}'+ '?friend_id=' + user_id
+        window.location = redirect_url
+    }
 	
 </script>
 

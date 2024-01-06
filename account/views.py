@@ -6,7 +6,6 @@ from django.conf import settings
 from .models import Account
 from django.db.models import Q
 from friends.utils import is_request_send, FriendRequestStatus
-from friends.models import FriendList
 
 
 def user_registration(request):

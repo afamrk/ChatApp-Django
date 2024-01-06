@@ -59,7 +59,7 @@
 				<div class="card-center px-2">
 					<h4 class="card-title">{{account.0.username}}</h4>
 					{% if account.1 %}
-					<p class="card-text"><a href="#" onclick="createOrReturnPrivateChat('{{account.0.id}}')">Send a Message</a></p>
+					<p class="card-text"><a href="#" onclick="redirect_to_private_chat('{{account.0.id}}')">Send a Message</a></p>
 					{% endif %}
 
 				</div>
@@ -116,9 +116,10 @@
 {#%  include 'chat/create_or_return_private_chat.html' %#}
 
 <script type="text/javascript">
-	function createOrReturnPrivateChat(userid){
-		// Just a placeholder
-	}
+    function redirect_to_private_chat(user_id){
+        const redirect_url = '{% url 'chat:private_chat_room' %}'+ '?friend_id=' + user_id
+        window.location = redirect_url
+    }
 </script>
 
 {% endblock content %}

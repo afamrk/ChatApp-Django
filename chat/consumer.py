@@ -1,18 +1,19 @@
-import asyncio
 import json
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from public_chat.models import PublicChatRoom, PublicChatMessages
+from chat.models import PrivateChatRoom, PrivateChatMessage
 from django.utils.html import escape
+from datetime import datetime
+
 from chat.utils import calculate_timestamp
 from chat.exceptions import ClientError
 
 User = get_user_model()
 
 
-class PublicChatConsumer(AsyncJsonWebsocketConsumer):
+class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         await self.accept()
         self.room = None
@@ -76,27 +77,17 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
             'success': True
         })
 
-        if self.user.is_authenticated:
-            await connect_user(self.user, room)
-
-        await self.update_user_count(room)
-
-        print(f'{self.user} is connected to {room}')
+        print(f'{self.user} is connected to {room.id}')
 
     async def leave_room(self, user, room):
-        if not user.is_authenticated:
-            return
         if not room:
             raise ClientError('ERROR', 'Unexpected Error')
-
-        await disconnect_user(user, room)
 
         await self.channel_layer.group_discard(
             room.group_name,
             self.channel_name
         )
-        print(f'{self.user} is disconnected from {room}')
-        await self.update_user_count(room)
+        print(f'{self.user} is disconnected from {room.id}')
         self.room = None
 
     async def send_error_message(self, e):
@@ -112,27 +103,6 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
         data = await get_old_messages(room, page)
         await self.send_json(data)
 
-    async def update_user_count(self, room: PublicChatRoom):
-        user_count = await get_user_count(room)
-        await self.channel_layer.group_send(
-            room.group_name,
-            {
-                'type': 'user.count.update',
-                'user_count': user_count,
-                'room_id': room.id
-            }
-        )
-
-    async def user_count_update(self, data):
-        await self.send_json(data)
-
-
-@database_sync_to_async
-def get_user_count(room: PublicChatRoom):
-    if room.users:
-        return room.users.count()
-    return 0
-
 
 @database_sync_to_async
 def get_user(user):
@@ -143,7 +113,7 @@ def get_user(user):
 
 @database_sync_to_async
 def get_old_messages(room, page):
-    paginator = Paginator(PublicChatMessages.objects.by_room(room), 10)
+    paginator = Paginator(PrivateChatMessage.objects.by_room(room), 10)
     current_page = paginator.get_page(page)
     old_messages = json.dumps(list(current_page.object_list), cls=LazyEncoder)
     data = {
@@ -155,32 +125,22 @@ def get_old_messages(room, page):
 
 
 @database_sync_to_async
-def get_chat_room_or_error(room_id) -> PublicChatRoom:
+def get_chat_room_or_error(room_id) -> PrivateChatRoom:
     try:
-        room = PublicChatRoom.objects.get(id=room_id)
-    except PublicChatRoom.DoesNotExist:
+        room = PrivateChatRoom.objects.get(id=room_id)
+    except PrivateChatRoom.DoesNotExist:
         raise ClientError('INVALID CHAT ROOM', 'invalid chat room')
     return room
 
 
 @database_sync_to_async
 def save_message_to_db(room, user, message):
-    return PublicChatMessages.objects.create(chat_room=room, user=user, content=message)
-
-
-@database_sync_to_async
-def connect_user(user, room: PublicChatRoom):
-    room.connect_user(user)
-
-
-@database_sync_to_async
-def disconnect_user(user, room: PublicChatRoom):
-    room.disconnect_user(user)
+    return PrivateChatMessage.objects.create(chat_room=room, user=user, content=message)
 
 
 class LazyEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, PublicChatMessages):
+        if isinstance(obj, PrivateChatMessage):
             return {
                 'message_id': obj.id,
                 'message': obj.content,
@@ -191,3 +151,6 @@ class LazyEncoder(json.JSONEncoder):
             }
         else:
             return super().default(obj)
+
+
+

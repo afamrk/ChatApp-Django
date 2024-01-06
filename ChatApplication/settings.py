@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'account',
     'friends',
     'public_chat',
+    'chat',
 
     "django.contrib.admin",
     "django.contrib.auth",

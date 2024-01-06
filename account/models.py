@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 from friends.models import FriendList
@@ -15,7 +17,6 @@ class AccountManager(BaseUserManager):
         )
         user.set_password(password)
         user.save()
-        FriendList(user=user).save()
         return user
 
     def create_superuser(self, email, username, password):
@@ -56,3 +57,9 @@ class Account(AbstractBaseUser):
 
     def has_perm(self, perm, obj=None):
         return self.is_admin
+
+
+@receiver(post_save, sender=Account)
+def user_save(sender, instance, created, **kwargs):
+    if created:
+        FriendList.objects.get_or_create(user=instance)
