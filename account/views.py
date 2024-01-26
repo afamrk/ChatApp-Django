@@ -95,3 +95,5 @@ def update_user(request, user_id: int):
     form = AccountUpdate(instance=request.user)
     context= {'form': form, 'DATA_UPLOAD_MAX_MEMORY_SIZE': settings.DATA_UPLOAD_MAX_MEMORY_SIZE}
     return render(request, 'account/edit_account.html', context)
+
+[403, 339, 221, 286, 179, 252, 175, 486, 259, 93, 118, 419, 298, 312, 306, 319, 344, 172, 149, 339, 329]

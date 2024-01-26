@@ -1,147 +1,213 @@
 {% load static %}
 
 <style type="text/css">
-	.chat-dropdown-header:hover{
-		cursor: pointer;
-		background: var(--main-background-color);
-	}
-	.chat-dropdown-header{
-		color: var(--light-primary-text-color);
+    .chat-dropdown-header:hover {
+        cursor: pointer;
+        background: var(--main-background-color);
+    }
+
+    .chat-dropdown-header {
+        color: var(--light-primary-text-color);
+    }
+    .scrollable-menu {
+		height: auto;
+		max-height: 90vh;
+		width: 500px;
+		overflow-x: hidden;
 	}
 </style>
 <!-- Header -->
 <div class="d-flex flex-column flex-lg-row p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
 
-	<!-- MEDIUM+ SCREENS -->
-	<div class="d-none d-md-flex flex-row my-auto flex-grow-1 align-items-center">
-		<h5 class="mr-3 font-weight-normal justify-content-start">
-			<a class="p-2 text-dark" href="{% url 'home' %}">Home</a>
-		</h5>
-		<form class="search-bar justify-content-start" action="{% url 'account:user_search' %}">
-			<input type="text" class="form-control" name="q" id="id_q_large" placeholder="Search...">
-		</form>
+    <!-- MEDIUM+ SCREENS -->
+    <div class="d-none d-md-flex flex-row my-auto flex-grow-1 align-items-center">
+        <h5 class="mr-3 font-weight-normal justify-content-start">
+            <a class="p-2 text-dark" href="{% url 'home' %}">Home</a>
+        </h5>
+        <form class="search-bar justify-content-start" action="{% url 'account:user_search' %}">
+            <input type="text" class="form-control" name="q" id="id_q_large" placeholder="Search...">
+        </form>
 
-		<div class="d-flex flex-row-reverse flex-grow-1">
-			<nav class="">
-				{% if request.user.is_authenticated %}
-					<div class="dropdown dropleft show p-2">
-						<div class="d-flex flex-row">
+        <div class="d-flex flex-row-reverse flex-grow-1">
+            <nav class="">
+                {% if request.user.is_authenticated %}
+                    <div class="dropdown dropleft show p-2">
+                        <div class="d-flex flex-row">
 
-							<div class="btn-group dropleft">
-								<div class="d-flex notifications-icon-container rounded-circle align-items-center mr-3" id="id_chat_notification_dropdown_toggle" data-toggle="dropdown">
-									<span id="id_chat_notifications_count" class="notify-badge"></span>
-									<span class="d-flex material-icons notifications-material-icon m-auto align-items-center">chat</span>
-									<div class="dropdown-menu scrollable-menu" aria-labelledby="id_chat_notification_dropdown_toggle" id="id_chat_notifications_container">
+                            <div class="btn-group dropleft">
+                                <div class="d-flex notifications-icon-container rounded-circle align-items-center mr-3"
+                                     id="id_chat_notification_dropdown_toggle" data-toggle="dropdown">
+                                    <span id="id_chat_notifications_count" class="notify-badge"></span>
+                                    <span class="d-flex material-icons notifications-material-icon m-auto align-items-center">chat</span>
+                                    <div class="dropdown-menu scrollable-menu"
+                                         aria-labelledby="id_chat_notification_dropdown_toggle"
+                                         id="id_chat_notifications_container">
 
-									</div>
-								</div>
-							</div>
+                                    </div>
+                                </div>
+                            </div>
 
-							<div class="btn-group dropleft">
-								<div class="d-flex notifications-icon-container rounded-circle align-items-center mr-3" id="id_notification_dropdown_toggle" data-toggle="dropdown" onclick="setGeneralNotificationsAsRead()">
-									<span id="id_general_notifications_count" class="notify-badge"></span>
-									<span class="d-flex material-icons notifications-material-icon m-auto align-items-center">notifications</span>
-									<div class="dropdown-menu scrollable-menu" aria-labelledby="id_notification_dropdown_toggle" id="id_general_notifications_container">
-									</div>
-								</div>
-							</div>
+                            <div class="btn-group dropleft">
+                                <div class="d-flex notifications-icon-container rounded-circle align-items-center mr-3"
+                                     id="id_notification_dropdown_toggle" data-toggle="dropdown"
+                                     onclick="setGeneralNotificationsAsRead()">
+                                    <span id="id_general_notifications_count" class="notify-badge"></span>
+                                    <span class="d-flex material-icons notifications-material-icon m-auto align-items-center">notifications</span>
+                                    <div class="dropdown-menu scrollable-menu"
+                                         aria-labelledby="id_notification_dropdown_toggle"
+                                         id="id_general_notifications_container">
+                                    </div>
+                                </div>
+                            </div>
 
-							<div class="btn-group dropleft">
-								<img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" src="{{ user.profile_image.url }}" alt="codingwithmitch logo" width="40" height="40">
-								<div class="dropdown-menu" aria-labelledby="id_profile_links">
+                            <div class="btn-group dropleft">
+                                <img class="account-image rounded-circle m-auto d-block dropdown-toggle"
+                                     id="id_profile_links" data-toggle="dropdown" aria-haspopup="true"
+                                     aria-expanded="false" src="{{ user.profile_image.url }}" alt="codingwithmitch logo"
+                                     width="40" height="40">
+                                <div class="dropdown-menu" aria-labelledby="id_profile_links">
                                     i
-									<a class="dropdown-item" href="{% url 'account:profile' user_id=user.id %}">Account</a>
-									<a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
-								</div>
-							</div>
-						</div>
+                                    <a class="dropdown-item"
+                                       href="{% url 'account:profile' user_id=user.id %}">Account</a>
+                                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                                </div>
+                            </div>
+                        </div>
 
-					</div>
-				{% else %}
-					<a class="p-2 text-dark" href="{% url 'login' %}">Login</a>
-					<a class="btn btn-outline-primary" href="{% url 'account:register' %}">Register</a>
-				{% endif %}
-			</nav>
-		</div>
-	</div>
-	<!-- END MEDIUM+ SCREENS -->
+                    </div>
+                {% else %}
+                    <a class="p-2 text-dark" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-outline-primary" href="{% url 'account:register' %}">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+    <!-- END MEDIUM+ SCREENS -->
 
-	<!-- SMALL SCREENS -->
-	<div class="d-flex d-md-none flex-column my-auto align-items-center">
-		<h5 class="font-weight-normal">
-		<a class="p-2 text-dark" href="{% url 'home' %}">Home</a>
-		</h5>
-		<form class="search-bar justify-content-start" >
-			<input type="text" class="form-control" name="q" id="id_q_small" placeholder="Search...">
-		</form>
-		<div class="d-flex flex-row-reverse flex-grow-1">
-			<nav class="">
-				{% if user.is_authenticated %}
-				<div class="dropdown dropleft p-2 mt-2">
-					<div class="d-flex flex-row">
-						<div class="btn-group dropleft">
-							<img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" src="{{ user.profile_image.url }}" alt="codingwithmitch logo" width="40" height="40">
-							<div class="dropdown-menu" aria-labelledby="id_profile_links">
-								<a class="dropdown-item" href="{% url 'account:profile' user_id=user.id %}">Account</a>
-								<a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
-							</div>
-						</div>
-					</div>
-				</div>
-				{% else %}
-					<a class="p-2 text-dark" href="{% url 'login' %}">Login</a>
-					<a class="btn btn-outline-primary m-2" href="{% url 'account:register' %}">Register</a>
-				{% endif %}
-			</nav>
-	  	</div>
-	</div>
-	<!-- END SMALL SCREENS -->
+    <!-- SMALL SCREENS -->
+    <div class="d-flex d-md-none flex-column my-auto align-items-center">
+        <h5 class="font-weight-normal">
+            <a class="p-2 text-dark" href="{% url 'home' %}">Home</a>
+        </h5>
+        <form class="search-bar justify-content-start">
+            <input type="text" class="form-control" name="q" id="id_q_small" placeholder="Search...">
+        </form>
+        <div class="d-flex flex-row-reverse flex-grow-1">
+            <nav class="">
+                {% if user.is_authenticated %}
+                    <div class="dropdown dropleft p-2 mt-2">
+                        <div class="d-flex flex-row">
+                            <div class="btn-group dropleft">
+                                <img class="account-image rounded-circle m-auto d-block dropdown-toggle"
+                                     id="id_profile_links" data-toggle="dropdown" aria-haspopup="true"
+                                     aria-expanded="false" src="{{ user.profile_image.url }}" alt="codingwithmitch logo"
+                                     width="40" height="40">
+                                <div class="dropdown-menu" aria-labelledby="id_profile_links">
+                                    <a class="dropdown-item"
+                                       href="{% url 'account:profile' user_id=user.id %}">Account</a>
+                                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <a class="p-2 text-dark" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-outline-primary m-2" href="{% url 'account:register' %}">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+    <!-- END SMALL SCREENS -->
 </div>
 
+<!-- Setup SOCKET for NOTIFICATIONS -->
+{% include 'snippets/imageload.html' %}
+{% include 'snippets/notifications.html' %}
 <script type="text/javascript">
-	setupChatDropdownHeader()
+    let notificationSocket = null;
+    let notification_page = 1;
+    {% if user.is_authenticated %}
+    setupSocket()
+    {% endif %}
+    function setupSocket() {
+        const ws_scheme = document.location.protocol === 'https' ? 'wss' : 'ws'
+        const websocket_path = `${document.location.host}/notification/`
+        const websocket_url = `${ws_scheme}://${websocket_path}`
+
+        notificationSocket = new WebSocket(websocket_url)
+
+        notificationSocket.onopen = function (e) {
+            console.log('socker opened');
+            setupGeneralNotificationsMenu()
+            getFirstGeneralNotificationsPage()
+        }
+        notificationSocket.onclose = function (e) {
+            console.error('Public ChatSocket closed.');
+        };
+
+
+        notificationSocket.onerror = function (e) {
+            console.log('Public ChatSocket error', e)
+        }
+        notificationSocket.onmessage = function (message) {
+            const data = JSON.parse(message.data)
+            const message_type = data['type']
+            if (message_type === 'error') {
+                showClientErrorModal(data.message)
+            } else if (message_type === 'old_notification') {
+                public_chat_page = data.next_page;
+                handleGeneralNotificationsData(data['notifications'], data['next_page'])
+                old_message_loading = false;
+            }
+        }
+    }
+
+</script>
+
+<script type="text/javascript">
+    setupChatDropdownHeader()
     {##}
-	{#function executeQuery() {#}
-	{#	var query = ""#}
-	{#	query = document.getElementById('id_q_small').value;#}
-	{#	if (query == ""){#}
-	{#		query = document.getElementById('id_q_large').value;#}
-	{#	}#}
-	{#    window.location.replace("{% url 'search' %}?q=" + query)#}
-	{#    return false#}
-	{#}#}
+    {#function executeQuery() {#}
+    {#	var query = ""#}
+    {#	query = document.getElementById('id_q_small').value;#}
+    {#	if (query == ""){#}
+    {#		query = document.getElementById('id_q_large').value;#}
+    {#	}#}
+    {#    window.location.replace("{% url 'search' %}?q=" + query)#}
+    {#    return false#}
+    {##}
 
-	/*
-		Add a header to the dropdown so users can visit /chat/
-	*/
-	function setupChatDropdownHeader(){
-		var notificationContainer = document.getElementById("id_chat_notifications_container")
+    /*
+        Add a header to the dropdown so users can visit /chat/
+    */
+    function setupChatDropdownHeader() {
+        var notificationContainer = document.getElementById("id_chat_notifications_container")
 
-		if(notificationContainer != null){
+        if (notificationContainer != null) {
 
-			var div = document.createElement("div")
-			div.classList.add("chat-dropdown-header", "d-flex", "flex-row", "justify-content-end", "m-auto", "align-items-end")
-			div.addEventListener("click", function(e){
-				var url = "{% url 'chat:private_chat_room' %}"
-				chatRedirect(url)
-			})
+            var div = document.createElement("div")
+            div.classList.add("chat-dropdown-header", "d-flex", "flex-row", "justify-content-end", "m-auto", "align-items-end")
+            div.addEventListener("click", function (e) {
+                var url = "{% url 'chat:private_chat_room' %}"
+                chatRedirect(url)
+            })
 
-			span1 = document.createElement("span")
-			span1.classList.add("mr-2")
-			span1.innerHTML = "Go to chat"
-			div.appendChild(span1)
+            span1 = document.createElement("span")
+            span1.classList.add("mr-2")
+            span1.innerHTML = "Go to chat"
+            div.appendChild(span1)
 
-			span2 = document.createElement("span")
-			span2.classList.add("material-icons", "mr-2")
-			span2.innerHTML = "open_with"
-			div.appendChild(span2)
-			notificationContainer.appendChild(div)
-		}
-	}
+            span2 = document.createElement("span")
+            span2.classList.add("material-icons", "mr-2")
+            span2.innerHTML = "open_with"
+            div.appendChild(span2)
+            notificationContainer.appendChild(div)
+        }
+    }
 
-	function chatRedirect(url){
-		window.location.href = url
-	}
+    function chatRedirect(url) {
+        window.location.href = url;
+    }
 
 </script>
 
