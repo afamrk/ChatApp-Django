@@ -1,9 +1,9 @@
-from datetime import datetime
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from django.db import models
 from django.conf import settings
 from chat.utils import get_or_create_private_chat
@@ -81,7 +81,7 @@ class FriedRequest(models.Model):
                                                 content_type=content_type, object_id=self.id)
         notification.verb = f"you are now friend with {self.sender.username}"
         notification.read = True
-        notification.timestamp = datetime.now()
+        notification.timestamp = timezone.now()
         notification.save()
 
         # notification for sender
@@ -101,7 +101,7 @@ class FriedRequest(models.Model):
                                                 content_type=content_type, object_id=self.id)
         notification.verb = f"You declined {self.sender.username} friend request"
         notification.read = True
-        notification.timestamp = datetime.now()
+        notification.timestamp = timezone.now()
         notification.save()
 
         self.notifications.create(
@@ -110,9 +110,16 @@ class FriedRequest(models.Model):
             redirect_url=reverse('account:profile', kwargs={'user_id': self.receiver.id}),
             verb=f"you friend request declined by {self.receiver.username}"
         )
+        return notification
 
     def cancel(self):
         self.is_active = False
+        content_type = ContentType.objects.get_for_model(self)
+        notification = Notification.objects.get(target=self.receiver, from_user=self.sender,
+                                                content_type=content_type, object_id=self.id)
+        notification.verb = f"{self.sender.username} cancelled friend reqeust sent to you"
+        notification.timestamp = timezone.now()
+        notification.save()
         self.save()
 
 

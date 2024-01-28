@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from .models import PrivateChatRoom
+from .models import PrivateChatRoom, PrivateChatMessage
 
 User = get_user_model()
 
@@ -17,17 +17,22 @@ def private_chat_room(request):
     if friend_id:
         try:
             friend = User.objects.get(id=friend_id)
-            query = Q(user1=request.user, user2=friend, is_active=True) | Q(user1=friend, user2=request.user, is_active=True)
+            query = Q(user1=request.user, user2=friend) | Q(user1=friend, user2=request.user)
             PrivateChatRoom.objects.get(query)
             context['friend_id'] = friend.id
         except Exception:
             return HttpResponseForbidden()
-    query = Q(user1=request.user, is_active=True) | Q(user2=request.user, is_active=True)
+    query = Q(user1=request.user) | Q(user2=request.user)
     user_chats = PrivateChatRoom.objects.filter(query)
     m_and_f = []
     for chat in user_chats:
+        last_message = PrivateChatMessage.objects.filter(chat_room=chat).last()
+        if last_message:
+            message = last_message.content
+        else:
+            message = ''
         m_and_f.append({
-            'message': 'testing',
+            'message': message,
             'room_id': chat.id,
             'friend': chat.user2 if chat.user1 == request.user else chat.user1
         })
