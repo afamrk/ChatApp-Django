@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from chat.models import PrivateChatRoom, PrivateChatMessage
+from chat.models import PrivateChatRoom, PrivateChatMessage, UnreadMessages
 from django.utils.html import escape
 from datetime import datetime
 
@@ -50,6 +50,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         if not self.room:
             raise ClientError('ERROR', 'Unexpected error')
         await save_message_to_db(self.room, self.user, content)
+        await append_unread_messages(self.room, self.user, content)
         await self.channel_layer.group_send(
             self.room.group_name,
             {
@@ -72,6 +73,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name
         )
 
+        await connect_user(self.room, self.user)
+        await on_user_connect(self.room, self.user)
+
         await self.send_json({
             'type': 'join',
             'success': True
@@ -87,6 +91,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             room.group_name,
             self.channel_name
         )
+        await disconnect_user(self.room, self.user)
         print(f'{self.user} is disconnected from {room.id}')
         self.room = None
 
@@ -136,6 +141,39 @@ def get_chat_room_or_error(room_id) -> PrivateChatRoom:
 @database_sync_to_async
 def save_message_to_db(room, user, message):
     return PrivateChatMessage.objects.create(chat_room=room, user=user, content=message)
+
+
+@database_sync_to_async
+def connect_user(room: PrivateChatRoom, user):
+    room.connect_user(user)
+
+
+@database_sync_to_async
+def disconnect_user(room: PrivateChatRoom, user):
+    room.disconnect_user(user)
+
+
+@database_sync_to_async
+def append_unread_messages(room, user, message):
+    other_user = room.user2 if room.user1 == user else room.user1
+    if other_user not in room.connected_users.all():
+        try:
+            unread_message = UnreadMessages.objects.get(user=other_user, room=room)
+            unread_message.recent_message = message
+            unread_message.count += 1
+            unread_message.save()
+        except UnreadMessages.DoesNotExist:
+            UnreadMessages(user=other_user, room=room, recent_message=message, count=1).save()
+
+
+@database_sync_to_async
+def on_user_connect(room, user):
+    try:
+        unread_message = UnreadMessages.objects.get(user=user, room=room)
+        unread_message.count = 0
+        unread_message.save()
+    except UnreadMessages.DoesNotExist:
+        UnreadMessages(user=user, room=room).save()
 
 
 class LazyEncoder(json.JSONEncoder):

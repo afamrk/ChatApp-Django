@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import PrivateChatRoom, PrivateChatMessage
+from .models import PrivateChatRoom, PrivateChatMessage, UnreadMessages
 
 # Register your models here.
 
@@ -15,5 +15,15 @@ class PrivateChatMessageAdmin(admin.ModelAdmin):
     show_full_result_count = False
 
 
+class UnreadChatRoomMessagesAdmin(admin.ModelAdmin):
+    list_display = ['room','user', 'count' ]
+    search_fields = ['room__user1__username', 'room__user2__username', ]
+    readonly_fields = ['id',]
+
+    class Meta:
+        model = UnreadMessages
+
+
+admin.site.register(UnreadMessages, UnreadChatRoomMessagesAdmin)
 admin.site.register(PrivateChatMessage, PrivateChatMessageAdmin)
 admin.site.register(PrivateChatRoom, PrivateChatRoomAdmin)
