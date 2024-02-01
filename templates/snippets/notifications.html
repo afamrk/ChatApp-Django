@@ -292,7 +292,6 @@
                 if (!notification['is_active'] && button_div) {
                     button_div.remove()
                 }
-                new_card = createFriendRequestElement(notification)
                 verb.innerText = notification['verb']
                 timestamp.innerText = notification['natural_timestamp']
                 break;
@@ -313,6 +312,7 @@
             menu.addEventListener("scroll", function (e) {
 
                 if ((notification_page && !old_notification_loading) && ((menu.scrollTop) >= (menu.scrollHeight - menu.offsetHeight))) {
+                    old_notification_loading = true;
                     getNextGeneralNotificationsPage(notification_page)
                 }
             });
@@ -353,7 +353,6 @@
         Called when page loads.
     */
     function getNextGeneralNotificationsPage(page) {
-        console.log(page)
         if ("{{user.is_authenticated}}") {
             notificationSocket.send(JSON.stringify({
                 "command": "old_notification",

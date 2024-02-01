@@ -129,7 +129,7 @@ def create_notification(sender, instance, created, **kwargs):
         instance.notifications.create(
             target=instance.receiver,
             from_user=instance.sender,
-            redirect_url=reverse('account:profile', kwargs={'user_id': instance.receiver.id}),
+            redirect_url=reverse('account:profile', kwargs={'user_id': instance.sender.id}),
             verb=f"{instance.sender.username} send you a friend reqeust"
         )
 

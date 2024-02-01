@@ -88,23 +88,22 @@ def update_unread_message(sender, instance, **kwargs):
         return
     previous = UnreadMessages.objects.get(id=instance.id)
     content_type = ContentType.objects.get_for_model(instance)
-    other_user = instance.other_user()
     if previous.count < instance.count:
         try:
-            notification = Notification.objects.get(content_type=content_type, object_id=instance.id)
+            notification = Notification.objects.get(content_type=content_type, object_id=instance.id, target=instance.user)
             notification.verb = instance.recent_message
             notification.timestamp = timezone.now()
             notification.save()
         except Notification.DoesNotExist:
             instance.notifications.create(
-                from_user=instance.user,
-                target=other_user,
+                from_user=instance.other_user(),
+                target=instance.user,
                 verb=instance.recent_message,
-                redirect_url=f"/chat/?room_id={instance.room.id}",  # we want to go to the chatroom
+                redirect_url=f"/chat/?friend_id={instance.other_user().id}",  # we want to go to the chatroom
             )
     elif instance.count == 0:
         try:
-            notification = Notification.objects.get(content_type=content_type, object_id=instance.id)
+            notification = Notification.objects.get(content_type=content_type, object_id=instance.id, target=instance.user)
             # notification.read = True
             # notification.save()
             notification.delete()

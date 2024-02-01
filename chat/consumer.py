@@ -163,7 +163,7 @@ def append_unread_messages(room, user, message):
             unread_message.count += 1
             unread_message.save()
         except UnreadMessages.DoesNotExist:
-            UnreadMessages(user=other_user, room=room, recent_message=message, count=1).save()
+            UnreadMessages(user=user, room=room, recent_message=message, count=1).save()
 
 
 @database_sync_to_async

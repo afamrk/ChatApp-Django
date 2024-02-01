@@ -16,12 +16,14 @@ class LazyNotificationEncoder(json.JSONEncoder):
                 'from': {
                     'image_url': obj.from_user.profile_image.url
                 },
-                'action': {
+                'actions': {
                     'redirect_url': obj.redirect_url
                 }
             }
             if data['notification_type'] == "friedrequest":
                 data['is_active'] = obj.content_object.is_active
+            if data['notification_type'] == "unreadmessages":
+                data['from']['name'] = obj.content_object.other_user().username
             return data
         else:
             return super().default(obj)

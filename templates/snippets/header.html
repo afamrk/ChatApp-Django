@@ -156,12 +156,16 @@
 <!-- Setup SOCKET for NOTIFICATIONS -->
 {% include 'snippets/imageload.html' %}
 {% include 'snippets/notifications.html' %}
+{% include 'snippets/chat_notifications.html' %}
 <script type="text/javascript">
     let notificationSocket = null;
     let notification_page = 1;
+    let chat_notification_page = 1;
     let old_notification_loading = false;
+    let chat_notification_loading = false;
     let unread = 4;
     let last_timestamp = null;
+    let chat_last_timestamp = null;
     {% if user.is_authenticated %}
     setupSocket()
     {% endif %}
@@ -174,8 +178,10 @@
 
         notificationSocket.onopen = function (e) {
             console.log('socker opened');
-            setupGeneralNotificationsMenu()
-            getNextGeneralNotificationsPage(notification_page)
+            setupGeneralNotificationsMenu();
+            getNextGeneralNotificationsPage(notification_page);
+            setupChatNotificationsMenu();
+            getNextChatNotificationsPage(chat_notification_page);
         }
         notificationSocket.onclose = function (e) {
             console.error('Public ChatSocket closed.');
@@ -202,59 +208,25 @@
                 setUnreadGeneralNotificationsCount(data['unread_count'])
                 refreshNotification(data['notifications'])
                 last_timestamp = data.last_timestamp
+            }else if (message_type === 'refresh_chat_notification'){
+                setUnreadChatNotificationsCount(data['unread_count'])
+                refreshChatNotification(data['notifications'])
+                last_timestamp = data.last_timestamp
+            }else if (message_type === 'old_chat_notification'){
+                chat_notification_page = data.next_page;
+                setUnreadChatNotificationsCount(data['unread_count'])
+                handleChatNotificationsData(data['notifications'], data['next_page'])
+                chat_notification_loading = false;
+                chat_last_timestamp = data.last_timestamp
             }
         }
         setInterval(refreshNotificationRequest, 5000)
+        setInterval(refreshChatNotificationRequest, 5000)
     }
 
 </script>
 
-<script type="text/javascript">
-    setupChatDropdownHeader()
-    {##}
-    {#function executeQuery() {#}
-    {#	var query = ""#}
-    {#	query = document.getElementById('id_q_small').value;#}
-    {#	if (query == ""){#}
-    {#		query = document.getElementById('id_q_large').value;#}
-    {#	}#}
-    {#    window.location.replace("{% url 'search' %}?q=" + query)#}
-    {#    return false#}
-    {##}
 
-    /*
-        Add a header to the dropdown so users can visit /chat/
-    */
-    function setupChatDropdownHeader() {
-        var notificationContainer = document.getElementById("id_chat_notifications_container")
-
-        if (notificationContainer != null) {
-
-            var div = document.createElement("div")
-            div.classList.add("chat-dropdown-header", "d-flex", "flex-row", "justify-content-end", "m-auto", "align-items-end")
-            div.addEventListener("click", function (e) {
-                var url = "{% url 'chat:private_chat_room' %}"
-                chatRedirect(url)
-            })
-
-            span1 = document.createElement("span")
-            span1.classList.add("mr-2")
-            span1.innerHTML = "Go to chat"
-            div.appendChild(span1)
-
-            span2 = document.createElement("span")
-            span2.classList.add("material-icons", "mr-2")
-            span2.innerHTML = "open_with"
-            div.appendChild(span2)
-            notificationContainer.appendChild(div)
-        }
-    }
-
-    function chatRedirect(url) {
-        window.location.href = url;
-    }
-
-</script>
 
 
 
